@@ -45,17 +45,8 @@ function computeTimeInterpolatedColor(start_ms,end_ms,time_ms) {
 }
 
 // It is possible this accessToken will someday reach a limit. We recommend you change it if that occurs.
-<<<<<<< HEAD
-=======
-const MAPBOXGL_ACCESSTOKEN = "";
->>>>>>> 637ca31 (updates)
 
-<<<<<<< HEAD
-const MAPBOXGL_ACCESSTOKEN =
-      "";
-=======
-const MAPBOXGL_ACCESSTOKEN = "";
->>>>>>> f299eed (updates)
+const MAPBOXGL_ACCESSTOKEN = "pk.eyJ1Ijoicm9iZXJ0bHJlYWQiLCJhIjoiY21wbzFwbjZjMDFjczJxcHZjNjY5bzF1cSJ9.vQ1VeDFxaikHIkMSb0kpqA";
 
 const checkForAppInDatabase = (appName) => {
   return new Promise((resolve) => {
@@ -238,11 +229,14 @@ async function createPhotoUploadTag(file, tags, username, color) {
   const filename = file.name;
   form.append("title", title);
   form.append("file", file);
-  form.append("filename", filename);
+    form.append("filename", filename);
+    console.log("tags",tags);
 //  var tagnum = highest_num + 1;
   //  var tagId = "geotag" + tagnum;
   // This tshould actually from the tags!
-  // Hopefully this is a UTC
+    // Hopefully this is a UTC
+    // TODO: some images don't have this, and it causes a bug.
+    // we need to andle it better.
   var lat = parseFloat(tags.GPSLatitude.description);
 
   // note: By convention, East longitude is positive
