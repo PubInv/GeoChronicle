@@ -31,7 +31,7 @@ and switch to storing the EventStore object.
 
 */
 
-
+const USE_LOCAL_STORAGE = false;
 
 
 // This will actually work with units other than ms,
@@ -46,6 +46,7 @@ function computeTimeInterpolatedColor(start_ms,end_ms,time_ms) {
 
 // It is possible this accessToken will someday reach a limit. We recommend you change it if that occurs.
 
+const MAPBOXGL_ACCESSTOKEN = 'pk.eyJ1Ijoicm9iZXJ0bHJlYWQiLCJhIjoiY21wbzFwbjZjMDFjczJxcHZjNjY5bzF1cSJ9.vQ1VeDFxaikHIkMSb0kpqA';
 
 const checkForAppInDatabase = (appName) => {
   return new Promise((resolve) => {
@@ -65,6 +66,7 @@ const checkForAppInDatabase = (appName) => {
 };
 
 function writeTag(
+    tagId,
   lat,
   lon,
   color,
@@ -83,7 +85,8 @@ function writeTag(
       latitude: lat,
       longitude: lon,
       color: color,
-      message: message,
+        //      message: message,
+        message: "test message",
       date: d.toUTCString(),
       filepath: filepath,
     },
@@ -92,7 +95,10 @@ function writeTag(
   //SERVER WRITE - POST, CAN ONLY GET 'GET' TO WORK
 
   // now I also place this tag in localStorage
-  writeTagLS(appname,obj);
+    //  writeTagLS(appname,obj);
+
+    console.log("obj:",obj);
+    console.log(JSON.stringify(obj));
   $.ajax({
     type: "GET",
     url: "writeTag",
@@ -290,7 +296,21 @@ async function createPhotoUploadTag(file, tags, username, color) {
   };
   form.append("obj", JSON.stringify(obj));
 
-  writeTagLS(GLOBAL_APPNAME,obj);
+    if (USE_LOCAL_STORAGE) {
+        writeTagLS(GLOBAL_APPNAME,obj);
+    } else {
+        writeTag(
+            safeTagId,
+            lat,
+            lon,
+            color,
+            message,
+            username,
+            // Warning, this is dubious
+            obj.appname,
+            url
+        );
+    }
 
   $.ajax({
     method: "POST",
@@ -491,12 +511,12 @@ function editDescription(filepath) {
 
 function saveDescription(filepath) {
   var newDescription = document.getElementById("desc-text-" + filepath).value;
-  
+
   $.ajax({
     type: "GET",
     url: "updateDescription",
     dataType: "json",
-    data: { 
+    data: {
       appName: GLOBAL_APPNAME,
       tagId: filepath.replace(/[./#$[\]]/g, "_"),
       description: newDescription
@@ -523,8 +543,11 @@ function initMap(appname) {
     zoom: 3,
   });
 
-  map.on("load",() => refreshAllDataLS(appname));
+    map.on("load",() => ( USE_LOCAL_STORAGE ? refreshAllDataLS(appname)
+                          : refreshAllDataDB(appname)));
+
 }
+
 
 function removeCurrentLoc() {
   var mapLayer = map.getLayer("point-current");
@@ -570,12 +593,13 @@ function renderMarkers(v) {
 
   for (const prop in v) {
     gt = v[prop];
-    gti = gt.taginfo;
-    adjust_global_times(gti.date);
+    gti = gt;
+    adjust_global_times(gt.date);
   }
   for (const prop in v) {
     gt = v[prop];
-    gti = gt.taginfo;
+      //    gti = gt.taginfo;
+      gti = gt;
     const time_ms = moment.utc(gti.date).valueOf();
     const color = computeTimeInterpolatedColor(GLOBAL_START,GLOBAL_END,time_ms);
     // Note: gt.color may remain of interest, but I am not currently rendering it.
@@ -583,7 +607,7 @@ function renderMarkers(v) {
       gti.longitude,
       gti.latitude,
       color,
-      gti.message,
+      gti.description,
       gti.message,
       gti.date
     );
@@ -598,49 +622,48 @@ function refreshAllDataLS(appname) {
   renderMarkers(data);
 }
 
-// function refreshAllData(appname) {
 
-//   return refreshAllDataLS(appname);
+function refreshAllDataDB(appname) {
 
-//   // first, remove all layers and markers and times
-//   clearWorkingSet();
-//   removeAllLayers();
-//   if (appname) {
-//     $.ajax({
-//       type: "GET",
-//       url: "returnTags",
-//       dataType: "json",
-//       data: { appName: appname },
-//       success: function (result) {
-//         renderMarkers(results);
-//         var v = result;
-//         for (const prop in v) {
-//           const n = parseInt(prop.substring("geotag".length));
-//           gt = v[prop];
-//           adjust_global_times(gt.date);
-//         }
-//         for (const prop in v) {
-//           const n = parseInt(prop.substring("geotag".length));
-//           gt = v[prop];
-//           const time_ms = moment.utc(gt.date).valueOf();
-//           const color = computeTimeInterpolatedColor(GLOBAL_START,GLOBAL_END,time_ms);
-//           // Note: gt.color may remain of interest, but I am not currently rendering it.
-//           showLngLatOnMap(
-//             gt.longitude,
-//             gt.latitude,
-//             color,
-//             gt.message,
-//             gt.filePath,
-//             gt.date
-//           );
-//         }
-//       },
-//       error: function (e) {
-//         console.log("ERROR: ", e);
-//       },
-//     });
-//   }
-// }
+  // first, remove all layers and markers and times
+  clearWorkingSet();
+  removeAllLayers();
+  if (appname) {
+    $.ajax({
+      type: "GET",
+      url: "returnTags",
+      dataType: "json",
+      data: { appName: appname },
+      success: function (result) {
+        renderMarkers(result);
+        var v = result;
+        for (const prop in v) {
+          const n = parseInt(prop.substring("geotag".length));
+          gt = v[prop];
+          adjust_global_times(gt.date);
+        }
+        for (const prop in v) {
+          const n = parseInt(prop.substring("geotag".length));
+          gt = v[prop];
+          const time_ms = moment.utc(gt.date).valueOf();
+          const color = computeTimeInterpolatedColor(GLOBAL_START,GLOBAL_END,time_ms);
+          // Note: gt.color may remain of interest, but I am not currently rendering it.
+          showLngLatOnMap(
+            gt.longitude,
+            gt.latitude,
+            color,
+            gt.description,
+            gt.filePath,
+            gt.date
+          );
+        }
+      },
+      error: function (e) {
+        console.log("ERROR: ", e);
+      },
+    });
+  }
+}
 
 // Rob has no idea where or how to get this...
 function cryptoHash(str) {

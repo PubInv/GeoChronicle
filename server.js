@@ -120,6 +120,7 @@ function writeTagIntoDB(obj, req) {
 }
 
 app.get("/writeTag", function (req, res) {
+    console.log("Called |writeTag|");
   var obj = req.query.taginfo;
   obj["latitude"] = parseFloat(obj.latitude);
   obj["longitude"] = parseFloat(obj.longitude);
@@ -155,7 +156,7 @@ app.get("/updateDescription", function (req, res) {
   var appName = req.query.appName;
   var tagId = req.query.tagId;
   var description = req.query.description;
-  
+
   firebase
     .database()
     .ref("/apps/" + appName + "/tags/" + tagId + "/description")
@@ -164,6 +165,7 @@ app.get("/updateDescription", function (req, res) {
         console.log("ERROR:", error);
         res.send(JSON.stringify({ success: false }));
       } else {
+          console.log("success:", error);
         res.send(JSON.stringify({ success: true }));
       }
     });
