@@ -45,7 +45,7 @@ function computeTimeInterpolatedColor(start_ms,end_ms,time_ms) {
 }
 
 // It is possible this accessToken will someday reach a limit. We recommend you change it if that occurs.
-const MAPBOXGL_ACCESSTOKEN = "pk.eyJ1Ijoicm9iZXJ0bHJlYWQiLCJhIjoiY21wbzFwbjZjMDFjczJxcHZjNjY5bzF1cSJ9.vQ1VeDFxaikHIkMSb0kpqA";
+
 
 const checkForAppInDatabase = (appName) => {
   return new Promise((resolve) => {
