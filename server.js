@@ -151,6 +151,23 @@ app.get("/actuallyCreate", function (req, res) {
     });
 });
 
+app.get("/updateDescription", function (req, res) {
+  var appName = req.query.appName;
+  var tagId = req.query.tagId;
+  var description = req.query.description;
+  
+  firebase
+    .database()
+    .ref("/apps/" + appName + "/tags/" + tagId + "/description")
+    .set(description, function (error) {
+      if (error) {
+        console.log("ERROR:", error);
+        res.send(JSON.stringify({ success: false }));
+      } else {
+        res.send(JSON.stringify({ success: true }));
+      }
+    });
+});
 const multer = require("multer");
 const os = require("os");
 //const ExifReader = require('exif-js')
@@ -159,7 +176,7 @@ const fs = require("fs");
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, "./");
+    cb(null, "./uploads/");
   },
   filename: function (req, file, cb) {
     console.log("compting file name");

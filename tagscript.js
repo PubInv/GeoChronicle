@@ -45,7 +45,7 @@ function computeTimeInterpolatedColor(start_ms,end_ms,time_ms) {
 }
 
 // It is possible this accessToken will someday reach a limit. We recommend you change it if that occurs.
-const MAPBOXGL_ACCESSTOKEN = "";
+const MAPBOXGL_ACCESSTOKEN = "pk.eyJ1Ijoicm9iZXJ0bHJlYWQiLCJhIjoiY21wbzFwbjZjMDFjczJxcHZjNjY5bzF1cSJ9.vQ1VeDFxaikHIkMSb0kpqA";
 
 const checkForAppInDatabase = (appName) => {
   return new Promise((resolve) => {
@@ -252,15 +252,19 @@ async function createPhotoUploadTag(file, tags, username, color) {
   console.dir(tags);
 
   // note: here I attempt to read time the photo was taken
-  var DateTimeOriginal = tags.DateTimeOriginal.value[0];
-  var DateTimeDigitized = tags.DateTimeDigitized.value[0];
-  var DateTime = tags.DateTime.value[0];
+  var DateTimeOriginal = tags.DateTimeOriginal ? tags.DateTimeOriginal.value[0] : null;
+  var DateTimeDigitized = tags.DateTimeDigitized ? tags.DateTimeDigitized.value[0] : null;
+  var DateTime = tags.DateTime ? tags.DateTime.value[0] : null;
   var mainTime = DateTimeDigitized || DateTimeOriginal || DateTime;
+  if (!mainTime) {
+  alert("This image has no date/time information.");
+  return;
+}
   // NOTE: This appears to be the EXIF format, although even
   // my phone appaears use different formats, so we have to wrap this
   // in a function and use some heurstics...
 
-  var offsetTime = tags.OffsetTime.value[0];
+  var offsetTime = tags.OffsetTime ? tags.OffsetTime.value[0] : "+00:00";
   var e_ms = ExifDecodeTime(mainTime,offsetTime);
   var mainTimeUTC = moment.unix(e_ms/1000).utc().toString();
 
@@ -269,9 +273,10 @@ async function createPhotoUploadTag(file, tags, username, color) {
   // code. We will turn it into a url (relative in this case)
   // by prepending "/uploads"
   var url = "uploads/"+filename;
+  var safeTagId = url.replace(/[./#$[\]]/g, "_");
   var obj = {
     appname: GLOBAL_APPNAME ? GLOBAL_APPNAME : "abc",
-    tagId: url,
+    tagId: safeTagId,
     taginfo: {
       username: username,
       latitude: lat,
@@ -279,6 +284,7 @@ async function createPhotoUploadTag(file, tags, username, color) {
       color: color,
       // TOOD: This should be renamed.
       message: url,
+      description: "",
       date: mainTimeUTC
     },
   };
@@ -402,9 +408,8 @@ function showLngLatOnMap(lonDec, latDec, color, message, filepath, timestamp) {
             coordinates: [lonDec, latDec],
           },
           properties: {
-            description:
-            "<p>" + message + "</p>",
-            color: color,
+          description: "<p>" + message + "</p>",
+          color: color,
           },
         },
       ],
@@ -422,9 +427,8 @@ function showLngLatOnMap(lonDec, latDec, color, message, filepath, timestamp) {
               coordinates: [lonDec, latDec],
             },
             properties: {
-              description:
-              "<p>" + message + "</p>",
-              color: color,
+            description: "<p>" + message + "</p>",
+            color: color,
             },
           },
         ],
@@ -456,7 +460,14 @@ function showLngLatOnMap(lonDec, latDec, color, message, filepath, timestamp) {
       // and then try to add a nice thumbnail.
       var fullHTML = `time: ${timestamp} <a href='${filepath}' target='_blank'> window</a> <div> <a href='${filepath}' download>download</a> </div>
 <img src="./${filepath}" alt="${filepath}" height="300">
-${description}`;
+<div id="desc-display">
+  <p><b>Description:</b> ${e.features[0].properties.description || "No description added"}</p>
+  <button onclick="editDescription('${filepath}')">Edit</button>
+</div>
+<div id="desc-edit-${filepath}" style="display:none">
+  <textarea id="desc-text-${filepath}" rows="2" cols="30">${e.features[0].properties.Description || ""}</textarea>
+  <button onclick="saveDescription('${filepath}')">Save</button>
+</div>`;
       if (GLOBAL_POPUP) GLOBAL_POPUP.remove();
       GLOBAL_POPUP = new mapboxgl.Popup().setLngLat(coordinates).setHTML(fullHTML).addTo(map);
     });
@@ -473,6 +484,33 @@ ${description}`;
   }
 }
 
+function editDescription(filepath) {
+  document.getElementById("desc-display").style.display = "none";
+  document.getElementById("desc-edit-" + filepath).style.display = "block";
+}
+
+function saveDescription(filepath) {
+  var newDescription = document.getElementById("desc-text-" + filepath).value;
+  
+  $.ajax({
+    type: "GET",
+    url: "updateDescription",
+    dataType: "json",
+    data: { 
+      appName: GLOBAL_APPNAME,
+      tagId: filepath.replace(/[./#$[\]]/g, "_"),
+      description: newDescription
+    },
+    success: function(result) {
+      document.getElementById("desc-display").querySelector("p").innerHTML = "<b>Description:</b> " + newDescription;
+      document.getElementById("desc-display").style.display = "block";
+      document.getElementById("desc-edit-" + filepath).style.display = "none";
+    },
+    error: function(e) {
+      console.log("ERROR: ", e);
+    }
+  });
+}
 var map;
 
 function initMap(appname) {
