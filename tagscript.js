@@ -31,9 +31,6 @@ and switch to storing the EventStore object.
 
 */
 
-
-
-
 // This will actually work with units other than ms,
 // so long as it is consistent.
 // I don't know how to handler outside-of-range problems.
@@ -45,7 +42,6 @@ function computeTimeInterpolatedColor(start_ms,end_ms,time_ms) {
 }
 
 // It is possible this accessToken will someday reach a limit. We recommend you change it if that occurs.
-const MAPBOXGL_ACCESSTOKEN = "";
 
 const checkForAppInDatabase = (appName) => {
   return new Promise((resolve) => {
@@ -475,7 +471,20 @@ ${description}`;
 
 var map;
 
+async function loadToken() {
+  const response = await fetch('mapbox');
+  const config = await response.json();
+  return config.mapboxkey
+}
+
 function initMap(appname) {
+// It is possible this accessToken will someday reach a limit. We recommend you change it if that occurs.
+let MAPBOXGL_ACCESSTOKEN;
+
+const GRAB_MAPBOX_TOKEN = loadToken();
+  GRAB_MAPBOX_TOKEN.then(function(result) {
+  MAPBOXGL_ACCESSTOKEN = result;
+
   mapboxgl.accessToken = MAPBOXGL_ACCESSTOKEN;
 
   map = new mapboxgl.Map({
@@ -486,6 +495,7 @@ function initMap(appname) {
   });
 
   map.on("load",() => refreshAllDataLS(appname));
+})
 }
 
 function removeCurrentLoc() {

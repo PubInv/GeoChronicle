@@ -67,6 +67,13 @@ var returnFirebaseSnapshot = (req, ref, res) => {
     });
 };
 
+app.get('/mapbox', function (req, res) {
+  res.json({
+    mapboxkey: process.env.MAPBOXGL_ACCESSTOKEN
+  })
+
+})
+
 app.get("/returnTags", function (req, res) {
   returnFirebaseSnapshot(req, "/tags/", res);
 });
