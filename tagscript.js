@@ -557,8 +557,9 @@ const GRAB_MAPBOX_TOKEN = loadToken();
   });
 
     map.on("load",() => ( USE_LOCAL_STORAGE ? refreshAllDataLS(appname)
-                          : refreshAllDataDB(appname)));
-
+                          : refreshAllDataDB(appname)))
+  }
+                        );
 }
 
 
