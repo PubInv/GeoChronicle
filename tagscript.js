@@ -31,7 +31,7 @@ and switch to storing the EventStore object.
 
 */
 
-
+const USE_LOCAL_STORAGE = false;
 
 
 // This will actually work with units other than ms,
@@ -45,8 +45,6 @@ function computeTimeInterpolatedColor(start_ms,end_ms,time_ms) {
 }
 
 // It is possible this accessToken will someday reach a limit. We recommend you change it if that occurs.
-
-const MAPBOXGL_ACCESSTOKEN = "pk.eyJ1Ijoicm9iZXJ0bHJlYWQiLCJhIjoiY21wbzFwbjZjMDFjczJxcHZjNjY5bzF1cSJ9.vQ1VeDFxaikHIkMSb0kpqA";
 
 const checkForAppInDatabase = (appName) => {
   return new Promise((resolve) => {
@@ -66,6 +64,7 @@ const checkForAppInDatabase = (appName) => {
 };
 
 function writeTag(
+    tagId,
   lat,
   lon,
   color,
@@ -84,7 +83,8 @@ function writeTag(
       latitude: lat,
       longitude: lon,
       color: color,
-      message: message,
+        //      message: message,
+        message: "test message",
       date: d.toUTCString(),
       filepath: filepath,
     },
@@ -93,7 +93,10 @@ function writeTag(
   //SERVER WRITE - POST, CAN ONLY GET 'GET' TO WORK
 
   // now I also place this tag in localStorage
-  writeTagLS(appname,obj);
+    //  writeTagLS(appname,obj);
+
+    console.log("obj:",obj);
+    console.log(JSON.stringify(obj));
   $.ajax({
     type: "GET",
     url: "writeTag",
@@ -224,19 +227,26 @@ function ExifDecodeTime(timeString,offset) {
 // we may use interplated color when we render this.
 async function createPhotoUploadTag(file, tags, username, color) {
   // This should really come from the GUI somehow
-  const title = "My file";
-  const form = new FormData();
-  const filename = file.name;
-  form.append("title", title);
-  form.append("file", file);
+    const title = "My file";
+    const form = new FormData();
+    const filename = file.name;
+    form.append("title", title);
+    form.append("file", file);
     form.append("filename", filename);
     console.log("tags",tags);
-//  var tagnum = highest_num + 1;
-  //  var tagId = "geotag" + tagnum;
-  // This tshould actually from the tags!
+    //  var tagnum = highest_num + 1;
+    //  var tagId = "geotag" + tagnum;
+    // This tshould actually from the tags!
     // Hopefully this is a UTC
-    // TODO: some images don't have this, and it causes a bug.
-    // we need to andle it better.
+    if (
+        !tags.GPSLatitude ||
+            !tags.GPSLongitude ||
+            !tags.GPSLongitudeRef
+    ) {
+        console.warn("Image has no GPS metadata");
+        alert("This image does not contain geolocation information.");
+        return;
+    }
   var lat = parseFloat(tags.GPSLatitude.description);
 
   // note: By convention, East longitude is positive
@@ -247,15 +257,19 @@ async function createPhotoUploadTag(file, tags, username, color) {
   console.dir(tags);
 
   // note: here I attempt to read time the photo was taken
-  var DateTimeOriginal = tags.DateTimeOriginal.value[0];
-  var DateTimeDigitized = tags.DateTimeDigitized.value[0];
-  var DateTime = tags.DateTime.value[0];
+  var DateTimeOriginal = tags.DateTimeOriginal ? tags.DateTimeOriginal.value[0] : null;
+  var DateTimeDigitized = tags.DateTimeDigitized ? tags.DateTimeDigitized.value[0] : null;
+  var DateTime = tags.DateTime ? tags.DateTime.value[0] : null;
   var mainTime = DateTimeDigitized || DateTimeOriginal || DateTime;
+  if (!mainTime) {
+  alert("This image has no date/time information.");
+  return;
+}
   // NOTE: This appears to be the EXIF format, although even
   // my phone appaears use different formats, so we have to wrap this
   // in a function and use some heurstics...
 
-  var offsetTime = tags.OffsetTime.value[0];
+  var offsetTime = tags.OffsetTime ? tags.OffsetTime.value[0] : "+00:00";
   var e_ms = ExifDecodeTime(mainTime,offsetTime);
   var mainTimeUTC = moment.unix(e_ms/1000).utc().toString();
 
@@ -264,9 +278,10 @@ async function createPhotoUploadTag(file, tags, username, color) {
   // code. We will turn it into a url (relative in this case)
   // by prepending "/uploads"
   var url = "uploads/"+filename;
+  var safeTagId = url.replace(/[./#$[\]]/g, "_");
   var obj = {
     appname: GLOBAL_APPNAME ? GLOBAL_APPNAME : "abc",
-    tagId: url,
+    tagId: safeTagId,
     taginfo: {
       username: username,
       latitude: lat,
@@ -274,12 +289,27 @@ async function createPhotoUploadTag(file, tags, username, color) {
       color: color,
       // TOOD: This should be renamed.
       message: url,
+      description: "",
       date: mainTimeUTC
     },
   };
   form.append("obj", JSON.stringify(obj));
 
-  writeTagLS(GLOBAL_APPNAME,obj);
+    if (USE_LOCAL_STORAGE) {
+        writeTagLS(GLOBAL_APPNAME,obj);
+    } else {
+        writeTag(
+            safeTagId,
+            lat,
+            lon,
+            color,
+            message,
+            username,
+            // Warning, this is dubious
+            obj.appname,
+            url
+        );
+    }
 
   $.ajax({
     method: "POST",
@@ -397,9 +427,8 @@ function showLngLatOnMap(lonDec, latDec, color, message, filepath, timestamp) {
             coordinates: [lonDec, latDec],
           },
           properties: {
-            description:
-            "<p>" + message + "</p>",
-            color: color,
+          description: "<p>" + message + "</p>",
+          color: color,
           },
         },
       ],
@@ -417,9 +446,8 @@ function showLngLatOnMap(lonDec, latDec, color, message, filepath, timestamp) {
               coordinates: [lonDec, latDec],
             },
             properties: {
-              description:
-              "<p>" + message + "</p>",
-              color: color,
+            description: "<p>" + message + "</p>",
+            color: color,
             },
           },
         ],
@@ -451,7 +479,14 @@ function showLngLatOnMap(lonDec, latDec, color, message, filepath, timestamp) {
       // and then try to add a nice thumbnail.
       var fullHTML = `time: ${timestamp} <a href='${filepath}' target='_blank'> window</a> <div> <a href='${filepath}' download>download</a> </div>
 <img src="./${filepath}" alt="${filepath}" height="300">
-${description}`;
+<div id="desc-display">
+  <p><b>Description:</b> ${e.features[0].properties.description || "No description added"}</p>
+  <button onclick="editDescription('${filepath}')">Edit</button>
+</div>
+<div id="desc-edit-${filepath}" style="display:none">
+  <textarea id="desc-text-${filepath}" rows="2" cols="30">${e.features[0].properties.Description || ""}</textarea>
+  <button onclick="saveDescription('${filepath}')">Save</button>
+</div>`;
       if (GLOBAL_POPUP) GLOBAL_POPUP.remove();
       GLOBAL_POPUP = new mapboxgl.Popup().setLngLat(coordinates).setHTML(fullHTML).addTo(map);
     });
@@ -468,9 +503,49 @@ ${description}`;
   }
 }
 
+function editDescription(filepath) {
+  document.getElementById("desc-display").style.display = "none";
+  document.getElementById("desc-edit-" + filepath).style.display = "block";
+}
+
+function saveDescription(filepath) {
+  var newDescription = document.getElementById("desc-text-" + filepath).value;
+
+  $.ajax({
+    type: "GET",
+    url: "updateDescription",
+    dataType: "json",
+    data: {
+      appName: GLOBAL_APPNAME,
+      tagId: filepath.replace(/[./#$[\]]/g, "_"),
+      description: newDescription
+    },
+    success: function(result) {
+      document.getElementById("desc-display").querySelector("p").innerHTML = "<b>Description:</b> " + newDescription;
+      document.getElementById("desc-display").style.display = "block";
+      document.getElementById("desc-edit-" + filepath).style.display = "none";
+    },
+    error: function(e) {
+      console.log("ERROR: ", e);
+    }
+  });
+}
 var map;
 
+async function loadToken() {
+  const response = await fetch('mapbox');
+  const config = await response.json();
+  return config.mapboxkey
+}
+
 function initMap(appname) {
+// It is possible this accessToken will someday reach a limit. We recommend you change it if that occurs.
+let MAPBOXGL_ACCESSTOKEN;
+
+const GRAB_MAPBOX_TOKEN = loadToken();
+  GRAB_MAPBOX_TOKEN.then(function(result) {
+  MAPBOXGL_ACCESSTOKEN = result;
+
   mapboxgl.accessToken = MAPBOXGL_ACCESSTOKEN;
 
   map = new mapboxgl.Map({
@@ -480,8 +555,12 @@ function initMap(appname) {
     zoom: 3,
   });
 
-  map.on("load",() => refreshAllDataLS(appname));
+    map.on("load",() => ( USE_LOCAL_STORAGE ? refreshAllDataLS(appname)
+                          : refreshAllDataDB(appname)))
+  }
+                        );
 }
+
 
 function removeCurrentLoc() {
   var mapLayer = map.getLayer("point-current");
@@ -527,12 +606,13 @@ function renderMarkers(v) {
 
   for (const prop in v) {
     gt = v[prop];
-    gti = gt.taginfo;
-    adjust_global_times(gti.date);
+    gti = gt;
+    adjust_global_times(gt.date);
   }
   for (const prop in v) {
     gt = v[prop];
-    gti = gt.taginfo;
+      //    gti = gt.taginfo;
+      gti = gt;
     const time_ms = moment.utc(gti.date).valueOf();
     const color = computeTimeInterpolatedColor(GLOBAL_START,GLOBAL_END,time_ms);
     // Note: gt.color may remain of interest, but I am not currently rendering it.
@@ -540,7 +620,7 @@ function renderMarkers(v) {
       gti.longitude,
       gti.latitude,
       color,
-      gti.message,
+      gti.description,
       gti.message,
       gti.date
     );
@@ -555,49 +635,48 @@ function refreshAllDataLS(appname) {
   renderMarkers(data);
 }
 
-// function refreshAllData(appname) {
 
-//   return refreshAllDataLS(appname);
+function refreshAllDataDB(appname) {
 
-//   // first, remove all layers and markers and times
-//   clearWorkingSet();
-//   removeAllLayers();
-//   if (appname) {
-//     $.ajax({
-//       type: "GET",
-//       url: "returnTags",
-//       dataType: "json",
-//       data: { appName: appname },
-//       success: function (result) {
-//         renderMarkers(results);
-//         var v = result;
-//         for (const prop in v) {
-//           const n = parseInt(prop.substring("geotag".length));
-//           gt = v[prop];
-//           adjust_global_times(gt.date);
-//         }
-//         for (const prop in v) {
-//           const n = parseInt(prop.substring("geotag".length));
-//           gt = v[prop];
-//           const time_ms = moment.utc(gt.date).valueOf();
-//           const color = computeTimeInterpolatedColor(GLOBAL_START,GLOBAL_END,time_ms);
-//           // Note: gt.color may remain of interest, but I am not currently rendering it.
-//           showLngLatOnMap(
-//             gt.longitude,
-//             gt.latitude,
-//             color,
-//             gt.message,
-//             gt.filePath,
-//             gt.date
-//           );
-//         }
-//       },
-//       error: function (e) {
-//         console.log("ERROR: ", e);
-//       },
-//     });
-//   }
-// }
+  // first, remove all layers and markers and times
+  clearWorkingSet();
+  removeAllLayers();
+  if (appname) {
+    $.ajax({
+      type: "GET",
+      url: "returnTags",
+      dataType: "json",
+      data: { appName: appname },
+      success: function (result) {
+        renderMarkers(result);
+        var v = result;
+        for (const prop in v) {
+          const n = parseInt(prop.substring("geotag".length));
+          gt = v[prop];
+          adjust_global_times(gt.date);
+        }
+        for (const prop in v) {
+          const n = parseInt(prop.substring("geotag".length));
+          gt = v[prop];
+          const time_ms = moment.utc(gt.date).valueOf();
+          const color = computeTimeInterpolatedColor(GLOBAL_START,GLOBAL_END,time_ms);
+          // Note: gt.color may remain of interest, but I am not currently rendering it.
+          showLngLatOnMap(
+            gt.longitude,
+            gt.latitude,
+            color,
+            gt.description,
+            gt.filePath,
+            gt.date
+          );
+        }
+      },
+      error: function (e) {
+        console.log("ERROR: ", e);
+      },
+    });
+  }
+}
 
 // Rob has no idea where or how to get this...
 function cryptoHash(str) {

@@ -191,7 +191,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
           id="refresh-all"
           class="center"
           type="button"
-          onclick="refreshAllDataLS(GLOBAL_APPNAME)">
+          onclick="refreshAllDataDB(GLOBAL_APPNAME)">
           Refresh
         </button>
       </div>
@@ -272,8 +272,12 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 	      dataType: 'json',
 	      data: {appName: GLOBAL_APPNAME},
 	      success: function(result){
-		reconfigureFromApp(GLOBAL_APPNAME);
-                refreshAllDataLS(GLOBAL_APP_NAME);
+		      reconfigureFromApp(GLOBAL_APPNAME);
+              if (USE_LOCAL_STORAGE) {
+                  refreshAllDataLS(GLOBAL_APPNAME);
+              } else {
+                  refreshAllDataDB(GLOBAL_APPNAME);
+              }
 	      },
 	      error : function(e) {
                 // I don't know why this is being called with status of 200!
@@ -402,7 +406,12 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
         console.log(error);
       }
       console.log("Calling Refresh!");
-      refreshAllDataLS(GLOBAL_APPNAME);
+//      refreshAllDataLS(GLOBAL_APPNAME);
+      if (USE_LOCAL_STORAGE) {
+          refreshAllDataLS(GLOBAL_APPNAME);
+      } else {
+          refreshAllDataDB(GLOBAL_APPNAME);
+      }
     }
     /* eslint-disable no-var */
     $(document).ready(function(){
