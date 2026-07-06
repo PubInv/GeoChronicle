@@ -533,7 +533,20 @@ function saveDescription(filepath) {
 }
 var map;
 
+async function loadToken() {
+  const response = await fetch('mapbox');
+  const config = await response.json();
+  return config.mapboxkey
+}
+
 function initMap(appname) {
+// It is possible this accessToken will someday reach a limit. We recommend you change it if that occurs.
+let MAPBOXGL_ACCESSTOKEN;
+
+const GRAB_MAPBOX_TOKEN = loadToken();
+  GRAB_MAPBOX_TOKEN.then(function(result) {
+  MAPBOXGL_ACCESSTOKEN = result;
+
   mapboxgl.accessToken = MAPBOXGL_ACCESSTOKEN;
 
   map = new mapboxgl.Map({
