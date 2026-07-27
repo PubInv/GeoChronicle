@@ -1,4 +1,4 @@
-# pjournal (but we need a better name)
+# GeoChronicle
 
 This is a system for easily using a phone or computer to upload a geolocated photo to create a spatial and temporal database. The database can then be viewed on a map.
 
