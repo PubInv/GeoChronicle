@@ -19,6 +19,8 @@ Clicking on a marker brings up a photo. The image below was made by walking near
 As of right now, the persistence of photos in in the local file system, but the metadata is in firebase. We are going to change this operate on a local install
 of MongoDB.
 
+We recently found [Eyewitness to Atrocities](https://www.eyewitness.global/) and we're thinking what to do about it. Rob has emailed them asking if we can give them a helping hand.
+
 
 ## Basic Idea
 
