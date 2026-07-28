@@ -478,7 +478,6 @@ function showLngLatOnMap(lonDec, latDec, color, message, filepath, timestamp) {
       // We will now add a direct link to the photo to the HTML in the popup,
       // and then try to add a nice thumbnail.
       const filename = filepath.split("/").pop();
-      //const filename = filepath.split("/").pop();
 
       var fullHTML = `
 <b>Filename:</b> ${filename}<br>
