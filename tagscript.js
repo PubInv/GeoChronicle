@@ -557,7 +557,7 @@ function initMap(appname) {
 
   const GRAB_MAPBOX_TOKEN = loadToken();
   GRAB_MAPBOX_TOKEN.then(function (result) {
-    MAPBOXGL_ACCESSTOKEN = "pk.eyJ1Ijoicm9iZXJ0bHJlYWQiLCJhIjoiY21wbzFwbjZjMDFjczJxcHZjNjY5bzF1cSJ9.vQ1VeDFxaikHIkMSb0kpqA";
+    MAPBOXGL_ACCESSTOKEN = result;
 
     mapboxgl.accessToken = MAPBOXGL_ACCESSTOKEN;
 
