@@ -50,6 +50,18 @@ As of right now, the persistence of photos in in the local file system, but the 
 
 We recently found [Eyewitness to Atrocities](https://www.eyewitness.global/) and we're thinking what to do about it. Rob has emailed them asking if we can give them a helping hand.
 
+## Security Features
+
+Although not our focus at present, we eventually want to make a system that can be used to document crimes.
+This may require the expertise of security and cryptography experts.
+Our idea is that if an image is uploaded, we will securely record an indelible timestamp and cryptographic hash 
+of the photo, proving that the photo existed before that date. 
+The photo can then be removed from the user's phone, mitigating personal risk to them.
+
+We believe there are interesting cryptographic issues raised by this. However, fundamentally,
+more documentation makes it harder to hide crimes.  If you are a security expert, we 
+welcome your advise or volunteer effort on this project.
+
 ## New Ideas Based on the March 19th Mini-con
 
 On March 18th, 2022, Public Invention held a  Mini-Con attended by a number of advisors:
