@@ -35,20 +35,18 @@ record of an event.
 In particular, this response was made in response to the invasion of the Ukraine by Russia and
 the potential need for making a journalistic record of that event.
 
+We recently found [Eyewitness to Atrocities](https://www.eyewitness.global/), a similar project, which is not open-source.
 
-## Status
 
-This is a fork of geotagtext, a geotagging tutorial app written by Robert L. Read, Diego Aspinwall, and Neil Martis.
-Currently the only expected author of this fork is Robert L. Read, although he is seeking volunteers!
+## Current Features
 
-As of March 10th, the project allows you to upload multiple photos and automatically extracts geolocation and time information to place markers on a map.
+As of August 3rd, 2026, the project allows you to upload multiple photos and automatically extracts geolocation and time information to place markers on a map.
 A color scale is used to represent time over the range of all photos uploaded.
 Clicking on a marker brings up a photo. The image below was made by walking near Barton Springs in Austin and using an iPhone to take 16 pictures.
 
 ![Screen Shot 2022-03-10 at 2 49 43 PM](https://user-images.githubusercontent.com/5296671/157765351-7674ffb8-0fbb-4c3a-9b60-4ad4dd989090.png)
 
-As of right now, the persistence of photos in in the local file system, but the metadata is in firebase. We are going to change this operate on a local install
-of MongoDB.
+As of right now, the persistence of photos in in the local file system, but the metadata is in firebase. One of our volunteers is currently attempting to store the images in firebase.
 
 We recently found [Eyewitness to Atrocities](https://www.eyewitness.global/) and we're thinking what to do about it. Rob has emailed them asking if we can give them a helping hand.
 
