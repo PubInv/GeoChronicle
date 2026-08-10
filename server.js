@@ -26,6 +26,7 @@ const firebase = require("firebase/app");
 
 require("firebase/auth");
 require("firebase/database");
+require("firebase/storage");
 
 const firebaseConfig = {
   apiKey: process.env.apiKey,
@@ -34,6 +35,7 @@ const firebaseConfig = {
   databaseURL: process.env.databaseURL,
   messagingSenderId: process.env.messagingSenderId,
   appId: process.env.appId,
+  storageBucket: process.env.storageBucket,
 };
 
 firebase.initializeApp(firebaseConfig);
@@ -183,7 +185,7 @@ const os = require("os");
 const ExifReader = require("exifreader");
 const fs = require("fs");
 
-const storage = multer.diskStorage({
+/*const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     cb(null, "./uploads/");
   },
@@ -196,6 +198,8 @@ const storage = multer.diskStorage({
 });
 
 const upload = multer({ storage: storage });
+*/
+const upload = multer({ storage: multer.memoryStorage() });
 
 app.post("/upload", upload.single("file"), function (req, res) {
   // by the time we get here, multer
@@ -209,10 +213,10 @@ app.post("/upload", upload.single("file"), function (req, res) {
   const title = req.body.title;
   const file = req.file;
   console.log(title);
-  file.filename = file.originalname;
-  console.log("file.path");
-  console.log(file.path);
-  console.log("file.path");
+// file.filename = file.originalname;
+//console.log("file.path");
+//console.log(file.path);
+// console.log("file.path");
 
   var fake_req = {};
   fake_req.query = {};
@@ -222,12 +226,16 @@ app.post("/upload", upload.single("file"), function (req, res) {
 
   var obj = {};
   try {
-    const data = fs.readFileSync(file.path);
-    const tags = ExifReader.load(data);
-    // the file.path is important to place in the
-    // datastore so we can render the photo...
-    myobj.taginfo.filePath = file.path;
-    writeTagIntoDB(myobj.taginfo, fake_req);
+  const storageRef = firebase.storage().ref();
+  const fileRef = storageRef.child("uploads/" + file.originalname);
+  fileRef.put(file.buffer).then((snapshot) => {
+    snapshot.ref.getDownloadURL().then((downloadURL) => {
+      myobj.taginfo.filePath = downloadURL;
+      myobj.taginfo.message = downloadURL;
+      writeTagIntoDB(myobj.taginfo, fake_req);
+    });
+  });
+
   } catch (err) {
     console.error(err);
   }
@@ -239,3 +247,4 @@ const port = process.env.PORT || 3000;
 app.listen(port, () => {
   console.log("PJournal listening on port " + port);
 });
+
