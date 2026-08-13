@@ -18,424 +18,400 @@ You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 -->
 <html>
-  <head>
-    <meta charset="utf-8" />
-    <meta
-      name="author"
-      content="Robert Read, Diego Aspinwall and Neil Martis" />
-    <title>Templokilo</title>
-    <meta
-      name="viewport"
-      content="initial-scale=1,maximum-scale=1,user-scalable=no" />
-    <link href="css/styles.css" rel="stylesheet" />
-    <!--- MapBox -->
-    <script src="https://api.mapbox.com/mapbox-gl-js/v2.1.0/mapbox-gl.js"></script>
-    <link
-      href="https://api.mapbox.com/mapbox-gl-js/v2.1.0/mapbox-gl.css"
-      rel="stylesheet" />
-    <script src="./js/exif-reader.js"></script>
-    <!--- Bootstrap-->
-    <link
-      rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/css/bootstrap.min.css" />
-    <link href="css/bootstrap-slider.css" rel="stylesheet">
-    <script
-  src="https://code.jquery.com/jquery-3.6.0.min.js"
-  integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4="
-      crossorigin="anonymous"></script>
-    <link rel="stylesheet" href="css/jquery-ui.css">
-    <script src="js/jquery.js"></script>
-    <script src="js/jquery-ui.js"></script>
 
-    <!-- Note: Moment.js is deprecated. I know of no good way to do the parsing we require without it. -->
-    <script src="js/moment.js"></script>
+<head>
+  <meta charset="utf-8" />
+  <meta name="author" content="Robert Read, Diego Aspinwall and Neil Martis" />
+  <title>Templokilo</title>
+  <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no" />
+  <link href="css/styles.css" rel="stylesheet" />
+  <!--- MapBox -->
+  <script src="https://api.mapbox.com/mapbox-gl-js/v2.1.0/mapbox-gl.js"></script>
+  <link href="https://api.mapbox.com/mapbox-gl-js/v2.1.0/mapbox-gl.css" rel="stylesheet" />
+  <script src="./js/exif-reader.js"></script>
+  <!--- Bootstrap-->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/css/bootstrap.min.css" />
+  <link href="css/bootstrap-slider.css" rel="stylesheet">
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"
+    integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="css/jquery-ui.css">
+  <script src="js/jquery.js"></script>
+  <script src="js/jquery-ui.js"></script>
 
-    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/js/bootstrap.bundle.min.js"></script>
-  </head>
+  <!-- Note: Moment.js is deprecated. I know of no good way to do the parsing we require without it. -->
+  <script src="js/moment.js"></script>
 
-  <body>
-    <div class="app-container">
-      <nav class="navbar navbar-expand-lg navbar-light bg-light">
-        <a class="navbar-brand" href="index.html">Templokilo</a>
-        <button
-          class="navbar-toggler"
-          type="button"
-          data-toggle="collapse"
-          data-target="#navbarNav"
-          aria-controls="navbarNav"
-          aria-expanded="false"
-          aria-label="Toggle navigation">
-          <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarNav">
-          <ul class="navbar-nav">
-            <li class="nav-item">
-              <a class="nav-link" href="index.html"
-                >Map<span class="sr-only">(current)</span></a
-              >
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="builder.html">App Builder</a>
-            </li>
-          </ul>
-        </div>
-      </nav>
-      <!-- begin slide-and-upload section -->
-      <div class="horizontalflex">
-        <div id="loadregion">
-          <form id="uploadregion">
-            <label for="file">Upload a Geotagged image:</label><br />
-            <input type="file" id="file" name="file" multiple/>
-          </form>
-          <label for="urluploads">Load URLs here:</label>
-          <textarea id="urluploads" name="urluploads" rows="2" cols="30">
+  <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/js/bootstrap.bundle.min.js"></script>
+</head>
+
+<body>
+  <div class="app-container">
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+      <a class="navbar-brand" href="index.html">Templokilo</a>
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
+        aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav">
+          <li class="nav-item">
+            <a class="nav-link" href="index.html">Map<span class="sr-only">(current)</span></a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="builder.html">App Builder</a>
+          </li>
+        </ul>
+      </div>
+    </nav>
+    <!-- begin slide-and-upload section -->
+    <div class="horizontalflex">
+      <div id="loadregion">
+        <form id="uploadregion">
+          <label for="file">Upload a Geotagged image:</label><br />
+          <input type="file" id="file" name="file" multiple />
+
+          <br />
+          <label for="tag-color">Tag color:</label>
+          <select id="tag-color">
+            <option value="red">Red</option>
+            <option value="yellow">Yellow</option>
+            <option value="green">Green</option>
+          </select>
+        </form>
+
+        <label for="urluploads">Load URLs here:</label>
+        <textarea id="urluploads" name="urluploads" rows="2" cols="30">
             Place urls of geotagged images here. They will will be processed
             and added to the map, and the URLs stored (NOT the files; if you file
             moves from the URL it may be lost.)
           </textarea>
-        </div>
       </div>
-      <div class="horizontalflex">
+    </div>
+    <div class="horizontalflex">
 
-        <div id="timeregion" class="verticalflex">
-          <div class="verticalflex">
-            <div id="colorbar" class="verticalflex">
-              <div class="horizontalflex">
-                <span>
-                  <label for="start-time">Start: </label>
-                  <span id="start-time"></span>
-                </span>
-                <span>
-                  <span id="end-time"> </span>
-                  <label for="end-time">: End</label>
-                </span>
-              </div>
-              <img src="https://raw.githubusercontent.com/d3/d3-scale-chromatic/master/img/RdYlBu.png" width="100%" height="16" alt="RdYlBu"/>
-            </div> <!-- ends static image and dates -->
-            <div id="sliderregion" class="verticalflex">
-              <div class="horizontalflex">
-                <span>
-                  <label for="display-start-time">Displayed Start: </label>
-                  <span id="display-start-time"></span>
-                </span>
-                <span>
-                  <span id="display-end-time"> </span>
-                  <label for="display-end-time">: Displayed End </label>
-                </span>
-              </div>
-              <div id="ex2"></div>
+      <div id="timeregion" class="verticalflex">
+        <div class="verticalflex">
+          <div id="colorbar" class="verticalflex">
+            <div class="horizontalflex">
+              <span>
+                <label for="start-time">Start: </label>
+                <span id="start-time"></span>
+              </span>
+              <span>
+                <span id="end-time"> </span>
+                <label for="end-time">: End</label>
+              </span>
             </div>
+            <img src="https://raw.githubusercontent.com/d3/d3-scale-chromatic/master/img/RdYlBu.png" width="100%"
+              height="16" alt="RdYlBu" />
+          </div> <!-- ends static image and dates -->
+          <div id="sliderregion" class="verticalflex">
+            <div class="horizontalflex">
+              <span>
+                <label for="display-start-time">Displayed Start: </label>
+                <span id="display-start-time"></span>
+              </span>
+              <span>
+                <span id="display-end-time"> </span>
+                <label for="display-end-time">: Displayed End </label>
+              </span>
+            </div>
+            <div id="ex2"></div>
           </div>
         </div>
-        <div class="error hidden"></div>
       </div>
-<!-- end slider-and-upload section -->
+      <div class="error hidden"></div>
+    </div>
+    <!-- end slider-and-upload section -->
     <div class="editor">
-        <div id="searchsection">
-          <div class="mb-3">
-            <input
-              type="text"
-              id="searchname"
-              placeholder="Search for an app" />
-            <button
-              type="button"
-              onclick="searchforapp('searchbar')"
-              class="btn btn-primary">
-              Search
-            </button>
-          </div>
+      <div id="searchsection">
+        <div class="mb-3">
+          <input type="text" id="searchname" placeholder="Search for an app" />
+          <button type="button" onclick="searchforapp('searchbar')" class="btn btn-primary">
+            Search
+          </button>
         </div>
-
-        <div class="mb-3" id="hideusername">
-          <label for="user-name">Name of user</label>
-          <input type="text" id="user-name" />
-        </div>
-
-        <div id="demo"></div>
-
-        <div class="input-group" id="hidemessage">
-          <div class="input-group-prepend">
-            <span class="input-group-text">Enter Message:</span>
-          </div>
-          <textarea
-            id="message"
-            class="form-control"
-            aria-label="Enter Message:"></textarea>
-        </div>
-
-        <p id="plocation-switch" class="center">
-          Display your current location?
-        </p>
-
-        <button
-          id="location-switch"
-          class="center"
-          type="button"
-          onclick="locationSwitch()">
-          Change to YES
-        </button>
       </div>
-      <!-- editor -->
 
-      <div class="map-container">
+      <div class="mb-3" id="hideusername">
+        <label for="user-name">Name of user</label>
+        <input type="text" id="user-name" />
+      </div>
+
+      <div id="demo"></div>
+
+      <div class="input-group" id="hidemessage">
+        <div class="input-group-prepend">
+          <span class="input-group-text">Enter Message:</span>
+        </div>
+        <textarea id="message" class="form-control" aria-label="Enter Message:"></textarea>
+      </div>
+
+      <p id="plocation-switch" class="center">
+        Display your current location?
+      </p>
+
+      <button id="location-switch" class="center" type="button" onclick="locationSwitch()">
+        Change to YES
+      </button>
+    </div>
+    <!-- editor -->
+
+    <div class="map-container">
       <div class="horizontalflex">
-        <button
-          id="delete-all"
-          class="center"
-          type="button"
-          onclick="deleteAllMarkers()">
+        <button id="delete-all" class="center" type="button" onclick="deleteAllMarkers()">
           Delete All Markers
         </button>
-        <button
-          id="refresh-all"
-          class="center"
-          type="button"
-          onclick="refreshAllDataDB(GLOBAL_APPNAME)">
+        <button id="refresh-all" class="center" type="button" onclick="refreshAllDataDB(GLOBAL_APPNAME)">
           Refresh
         </button>
       </div>
-        <div id="map"></div>
-      </div>
-      <div class="tags">
-        <div id="exif-table-body"></div>
-      </div>
+      <div id="map"></div>
     </div>
-    <!-- app-container -->
-  </body>
+    <div class="tags">
+      <div id="exif-table-body"></div>
+    </div>
+  </div>
+  <!-- app-container -->
+</body>
 
-  <script type="text/javascript" src="tagscript.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script type="text/javascript" src="tagscript.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 
-  <script src="https://cdn.jsdelivr.net/npm/d3-color@3"></script>
-  <script src="https://cdn.jsdelivr.net/npm/d3-interpolate@3"></script>
-  <script src="https://cdn.jsdelivr.net/npm/d3-scale-chromatic@3"></script>
+<script src="https://cdn.jsdelivr.net/npm/d3-color@3"></script>
+<script src="https://cdn.jsdelivr.net/npm/d3-interpolate@3"></script>
+<script src="https://cdn.jsdelivr.net/npm/d3-scale-chromatic@3"></script>
 
-  <script>
+<script>
   // TODO: Remove these when we have code inplace
   const chrome00 = d3.interpolateRdYlBu(0);
   const chrome05 = d3.interpolateRdYlBu(0.5);
   const chrome100 = d3.interpolateRdYlBu(1);
 
-    const params = (new URL(document.location)).searchParams;
-    var GLOBAL_APPNAME = params.get('app');
-    if (GLOBAL_APPNAME) {searchforapp('query');}
+  const params = (new URL(document.location)).searchParams;
+  var GLOBAL_APPNAME = params.get('app');
+  if (GLOBAL_APPNAME) { searchforapp('query'); }
 
-    // These hold the start and end time (in ms since the UNIX epoch time)
-    // for the "working set" of events. This corresponds to everthing to
-    // display if the time slider is fully rendered.
-    var GLOBAL_START = null;
-    var GLOBAL_END = null;
-    // These represent the interpolations of time against the GLOBAL_START
-    // and GLOBAL_END based on the two values of the slider
-    var GLOBAL_DISPLAYED_START = null;
-    var GLOBAL_DISPLAYD_END = null;
+  // These hold the start and end time (in ms since the UNIX epoch time)
+  // for the "working set" of events. This corresponds to everthing to
+  // display if the time slider is fully rendered.
+  var GLOBAL_START = null;
+  var GLOBAL_END = null;
+  // These represent the interpolations of time against the GLOBAL_START
+  // and GLOBAL_END based on the two values of the slider
+  var GLOBAL_DISPLAYED_START = null;
+  var GLOBAL_DISPLAYD_END = null;
 
-    function adjust_global_times(dstring) {
+  function adjust_global_times(dstring) {
 
-      // now switch to UTC
-      // var mom = moment(dstring,'YYYY:MM:DD hh:mm:ss');
-      var mom = moment(dstring);
+    // now switch to UTC
+    // var mom = moment(dstring,'YYYY:MM:DD hh:mm:ss');
+    var mom = moment(dstring);
 
-      var e_ms = mom.valueOf();
-      if (GLOBAL_START === null) {
-        GLOBAL_START = e_ms;
-      }
-      if (GLOBAL_END === null) {
-        GLOBAL_END = e_ms;
-      }
-      if (GLOBAL_START > e_ms) {
-        GLOBAL_START = e_ms;
-      }
-      if (GLOBAL_END < e_ms) {
-        GLOBAL_END = e_ms;
-      }
-      // now make sure the values of the sliders are correct
-      $("#start-time").text(moment.unix(GLOBAL_START/1000).utc().toString());
-      $("#end-time").text(moment.unix(GLOBAL_END/1000).utc().toString());
+    var e_ms = mom.valueOf();
+    if (GLOBAL_START === null) {
+      GLOBAL_START = e_ms;
     }
-
-    var GLOBAL_UPDATE_POSITION_TIMER;
-
-    var GLOBAL_CONFIG = { yesname: false,
-		          yestextmessage: false,
-		          red: false,
-		          blue: false,
-		          green: false,
-			  currentlocation: true
-
-		        };
-
-    function deleteAllTags() {
-      $.ajax({type : "GET",
-	      url: "deleteAllMarkers",
-	      dataType: 'json',
-	      data: {appName: GLOBAL_APPNAME},
-	      success: function(result){
-		      reconfigureFromApp(GLOBAL_APPNAME);
-              if (USE_LOCAL_STORAGE) {
-                  refreshAllDataLS(GLOBAL_APPNAME);
-              } else {
-                  refreshAllDataDB(GLOBAL_APPNAME);
-              }
-	      },
-	      error : function(e) {
-                // I don't know why this is being called with status of 200!
-                if (e.status != 200) {
-		  console.log("ERROR: ", e);
-                }
-	      }
-	     });
+    if (GLOBAL_END === null) {
+      GLOBAL_END = e_ms;
     }
-    function deleteAllTagsLS() {
-      window.localStorage.setItem(GLOBAL_APPNAME,
-                                  JSON.stringify({}));
+    if (GLOBAL_START > e_ms) {
+      GLOBAL_START = e_ms;
     }
-
-
-    function deleteAllMarkers() {
-      removeAllLayers();
-      clearWorkingSet();
-      deleteAllTags();
-      deleteAllTagsLS();
+    if (GLOBAL_END < e_ms) {
+      GLOBAL_END = e_ms;
     }
+    // now make sure the values of the sliders are correct
+    $("#start-time").text(moment.unix(GLOBAL_START / 1000).utc().toString());
+    $("#end-time").text(moment.unix(GLOBAL_END / 1000).utc().toString());
+  }
 
-    function locationSwitch() {
-	if (($('#location-switch').text() == "Change to YES") &&
-	    (GLOBAL_CONFIG.currentlocation == true)) {
-	    $('#location-switch').text("Change to NO");
-	    GLOBAL_UPDATE_POSITION_TIMER = setInterval(function() { getLocation('black'); }, 5000);
-	}
-	else {
-	    $('#location-switch').text("Change to YES");
-	    clearInterval(GLOBAL_UPDATE_POSITION_TIMER);
-	    removeCurrentLoc();
-	}
-    }
+  var GLOBAL_UPDATE_POSITION_TIMER;
 
-    function reconfigureFromConfig(config) {
-	$("#hideusername").toggle(config.yesname);
-	$("#hidemessage").toggle(config.yestextmessage);
-	$("#blue").toggle(config.blue);
-	$("#green").toggle(config.green);
-	$("#red").toggle(config.red);
-	const currentLocation = (config.currentLocation ===undefined) ? false : config.currentLocation;
-	$('#location-switch').toggle(currentLocation);
-	$('#plocation-switch').toggle(currentLocation);
-    }
+  var GLOBAL_CONFIG = {
+    yesname: false,
+    yestextmessage: false,
+    red: false,
+    blue: false,
+    green: false,
+    currentlocation: true
 
-    function clearWorkingSet() {
-      GLOBAL_START = null;
-      GLOBAL_END = null;
-      GLOBAL_DISPLAYED_START = null;
-      GLOBAL_DISPLAYED_END = null;
-    }
-    function reconfigureFromApp(appName) {
-      clearWorkingSet();
-	$.ajax({type : "GET",
-		url: "reconfigureFromApp",
-		dataType: 'json',
-		data: {appName: appName},
-		success: function(result){
-		    reconfigureFromConfig(result);
-		},
-		error : function(e) {
-		    console.log("ERROR: ", e);
-		}
-	       });
-    }
+  };
 
-    async function searchforapp(placeUsed) {
-	$('#location-switch').text("Change to YES");
-	if (GLOBAL_UPDATE_POSITION_TIMER) {
-	    clearInterval(GLOBAL_UPDATE_POSITION_TIMER);
-	}
-	$('#demo').text("");
-	if (placeUsed == 'searchbar') {
-	    GLOBAL_APPNAME = document.getElementById("searchname").value;
-	    removeCurrentLoc();
-	}
-
-	const appCheck = await checkForAppInDatabase(GLOBAL_APPNAME);
-
-	if (appCheck) {
-            reconfigureFromApp(GLOBAL_APPNAME);
-	    initMap(GLOBAL_APPNAME);
-	    $('#appnametitle').text("Map Application Name: "+GLOBAL_APPNAME);
-	    $('#searchsection').hide();
-	} else {
-            alert("app: "+GLOBAL_APPNAME + " not found!");
-	}
-    }
-
-    document.getElementById('file').addEventListener('change', handleFile);
-
-    async function handleFile(event) {
-      try {
-        // Does this imply that files may allow multiple uploads and this should be in a loop?
-        // NOTE: This is not a good way to iterate here
-        for (let i = 0; i < event.target.files.length; i++) {
-          const file = event.target.files[i];
-          const tags = await ExifReader.load(file);
-
-          // The MakerNote tag can be really large. Remove it to lower
-          // memory usage if you're parsing a lot of files and saving the
-          // tags.
-          //        delete tags['MakerNote'];
-
-          // If you want to extract the thumbnail you can use it like
-          // this:
-          // if (tags['Thumbnail'] && tags['Thumbnail'].image) {
-          //   const image = document.getElementById('thumbnail');
-          //   image.classList.remove('hidden');
-          //   image.src = 'data:image/jpg;base64,' + tags['Thumbnail'].base64;
-          // }
-          // console.dir(tags);
-          var username = "spud";
-          // This should be used for tagging the photo, perhaps
-          // from a selector, but I don't have that now.
-          // Note: I'm using black as an "assigned color",
-          // but we may render in a different color. We
-          // may eventually implement color in a more
-          // sophisticated way, for mmultiple purposes.
-          await createPhotoUploadTag(file,tags,username,"black");
-        }
-      } catch (error) {
-        // Handle error.
-        // Note: this is ALWAYS throwing a DataView Error, and I have no idea why!
-        console.log(error);
-      }
-      console.log("Calling Refresh!");
-//      refreshAllDataLS(GLOBAL_APPNAME);
-      if (USE_LOCAL_STORAGE) {
+  function deleteAllTags() {
+    $.ajax({
+      type: "GET",
+      url: "deleteAllMarkers",
+      dataType: 'json',
+      data: { appName: GLOBAL_APPNAME },
+      success: function (result) {
+        reconfigureFromApp(GLOBAL_APPNAME);
+        if (USE_LOCAL_STORAGE) {
           refreshAllDataLS(GLOBAL_APPNAME);
-      } else {
+        } else {
           refreshAllDataDB(GLOBAL_APPNAME);
+        }
+      },
+      error: function (e) {
+        // I don't know why this is being called with status of 200!
+        if (e.status != 200) {
+          console.log("ERROR: ", e);
+        }
       }
+    });
+  }
+  function deleteAllTagsLS() {
+    window.localStorage.setItem(GLOBAL_APPNAME,
+      JSON.stringify({}));
+  }
+
+
+  function deleteAllMarkers() {
+    removeAllLayers();
+    clearWorkingSet();
+    deleteAllTags();
+    deleteAllTagsLS();
+  }
+
+  function locationSwitch() {
+    if (($('#location-switch').text() == "Change to YES") &&
+      (GLOBAL_CONFIG.currentlocation == true)) {
+      $('#location-switch').text("Change to NO");
+      GLOBAL_UPDATE_POSITION_TIMER = setInterval(function () { getLocation('black'); }, 5000);
     }
-    /* eslint-disable no-var */
-    $(document).ready(function(){
-      reconfigureFromConfig(GLOBAL_CONFIG);
-      $( "#ex2" ).slider({
+    else {
+      $('#location-switch').text("Change to YES");
+      clearInterval(GLOBAL_UPDATE_POSITION_TIMER);
+      removeCurrentLoc();
+    }
+  }
+
+  function reconfigureFromConfig(config) {
+    $("#hideusername").toggle(config.yesname);
+    $("#hidemessage").toggle(config.yestextmessage);
+    $("#blue").toggle(config.blue);
+    $("#green").toggle(config.green);
+    $("#red").toggle(config.red);
+    const currentLocation = (config.currentLocation === undefined) ? false : config.currentLocation;
+    $('#location-switch').toggle(currentLocation);
+    $('#plocation-switch').toggle(currentLocation);
+  }
+
+  function clearWorkingSet() {
+    GLOBAL_START = null;
+    GLOBAL_END = null;
+    GLOBAL_DISPLAYED_START = null;
+    GLOBAL_DISPLAYED_END = null;
+  }
+  function reconfigureFromApp(appName) {
+    clearWorkingSet();
+    $.ajax({
+      type: "GET",
+      url: "reconfigureFromApp",
+      dataType: 'json',
+      data: { appName: appName },
+      success: function (result) {
+        reconfigureFromConfig(result);
+      },
+      error: function (e) {
+        console.log("ERROR: ", e);
+      }
+    });
+  }
+
+  async function searchforapp(placeUsed) {
+    $('#location-switch').text("Change to YES");
+    if (GLOBAL_UPDATE_POSITION_TIMER) {
+      clearInterval(GLOBAL_UPDATE_POSITION_TIMER);
+    }
+    $('#demo').text("");
+    if (placeUsed == 'searchbar') {
+      GLOBAL_APPNAME = document.getElementById("searchname").value;
+      removeCurrentLoc();
+    }
+
+    const appCheck = await checkForAppInDatabase(GLOBAL_APPNAME);
+
+    if (appCheck) {
+      reconfigureFromApp(GLOBAL_APPNAME);
+      initMap(GLOBAL_APPNAME);
+      $('#appnametitle').text("Map Application Name: " + GLOBAL_APPNAME);
+      $('#searchsection').hide();
+    } else {
+      alert("app: " + GLOBAL_APPNAME + " not found!");
+    }
+  }
+
+  document.getElementById('file').addEventListener('change', handleFile);
+
+  async function handleFile(event) {
+    try {
+      // Does this imply that files may allow multiple uploads and this should be in a loop?
+      // NOTE: This is not a good way to iterate here
+      for (let i = 0; i < event.target.files.length; i++) {
+        const file = event.target.files[i];
+        const tags = await ExifReader.load(file);
+
+        // The MakerNote tag can be really large. Remove it to lower
+        // memory usage if you're parsing a lot of files and saving the
+        // tags.
+        //        delete tags['MakerNote'];
+
+        // If you want to extract the thumbnail you can use it like
+        // this:
+        // if (tags['Thumbnail'] && tags['Thumbnail'].image) {
+        //   const image = document.getElementById('thumbnail');
+        //   image.classList.remove('hidden');
+        //   image.src = 'data:image/jpg;base64,' + tags['Thumbnail'].base64;
+        // }
+        // console.dir(tags);
+        var username = "spud";
+        // This should be used for tagging the photo, perhaps
+        // from a selector, but I don't have that now.
+        // Note: I'm using black as an "assigned color",
+        // but we may render in a different color. We
+        // may eventually implement color in a more
+        // sophisticated way, for mmultiple purposes.
+        const selectedColor = document.getElementById("tag-color").value;
+        await createPhotoUploadTag(file, tags, username, selectedColor);
+      }
+    } catch (error) {
+      // Handle error.
+      // Note: this is ALWAYS throwing a DataView Error, and I have no idea why!
+      console.log(error);
+    }
+    console.log("Calling Refresh!");
+    //      refreshAllDataLS(GLOBAL_APPNAME);
+    if (USE_LOCAL_STORAGE) {
+      refreshAllDataLS(GLOBAL_APPNAME);
+    } else {
+      refreshAllDataDB(GLOBAL_APPNAME);
+    }
+  }
+  /* eslint-disable no-var */
+  $(document).ready(function () {
+    reconfigureFromConfig(GLOBAL_CONFIG);
+    $("#ex2").slider({
       range: true,
       min: 0,
       max: 1000,
-      values: [ 0, 1000 ],
-        slide: function( event, ui ) {
-          // How we adjust the times to reflect the percentages of GLOBAL_START and GLOBAL_END
-          // as GLOBAL_DISPLAYED_START and GLOBAL_DISPLAYED_END
-          const start_fraction = ui.values[ 0 ] / 1000.0;
-          const end_fraction   = ui.values[ 1 ] / 1000.0;
-          const duration_ms = GLOBAL_END - GLOBAL_START;
-          GLOBAL_DISPLAYED_START = GLOBAL_START + start_fraction * duration_ms;
-          GLOBAL_DISPLAYED_END = GLOBAL_START + end_fraction * duration_ms;
-          $("#display-start-time").text(moment.unix(GLOBAL_DISPLAYED_START/1000).utc().toString());
-          $("#display-end-time").text(moment.unix(GLOBAL_DISPLAYED_END/1000).utc().toString());
-          hideBasedOnTimes(GLOBAL_DISPLAYED_START,GLOBAL_DISPLAYED_END);
-        }
-      });
+      values: [0, 1000],
+      slide: function (event, ui) {
+        // How we adjust the times to reflect the percentages of GLOBAL_START and GLOBAL_END
+        // as GLOBAL_DISPLAYED_START and GLOBAL_DISPLAYED_END
+        const start_fraction = ui.values[0] / 1000.0;
+        const end_fraction = ui.values[1] / 1000.0;
+        const duration_ms = GLOBAL_END - GLOBAL_START;
+        GLOBAL_DISPLAYED_START = GLOBAL_START + start_fraction * duration_ms;
+        GLOBAL_DISPLAYED_END = GLOBAL_START + end_fraction * duration_ms;
+        $("#display-start-time").text(moment.unix(GLOBAL_DISPLAYED_START / 1000).utc().toString());
+        $("#display-end-time").text(moment.unix(GLOBAL_DISPLAYED_END / 1000).utc().toString());
+        hideBasedOnTimes(GLOBAL_DISPLAYED_START, GLOBAL_DISPLAYED_END);
+      }
     });
-    $(initMap(null));
-  </script>
+  });
+  $(initMap(null));
+</script>
 
 </html>

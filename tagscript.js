@@ -225,6 +225,7 @@ function ExifDecodeTime(timeString, offset) {
 
 // Note: Color her is should be "assigned color",
 // we may use interplated color when we render this.
+
 async function createPhotoUploadTag(file, tags, username, color) {
   // This should really come from the GUI somehow
   const title = "My file";
@@ -327,13 +328,10 @@ async function createPhotoUploadTag(file, tags, username, color) {
       // I think we can eliminate that...
       adjust_global_times(mainTime);
       var filepath = url;
-      const interpolated_color =
-        computeTimeInterpolatedColor(GLOBAL_START, GLOBAL_END, e_ms);
-      showPositionOnPage(position, interpolated_color, filepath, filepath);
+      showPositionOnPage(position, color, filepath, filepath);
     })
     .fail((error) => console.log(error));
 }
-
 // function createTag(position, color, appname, filepath) {
 //   var message = $("#message").val();
 //   showPositionOnPage(position, color, message, filepath);
@@ -412,7 +410,6 @@ function removeAllLayers() {
 // way of handling the problem.
 function showLngLatOnMap(lonDec, latDec, color, message, filepath, timestamp) {
   var ll = new mapboxgl.LngLat(lonDec, latDec);
-
   // here we will interpolate color based on time.
   // This is NOT an intrinsic property of the point,
   // but a property of all the data.
@@ -625,8 +622,7 @@ function renderMarkers(v) {
     gt = v[prop];
     //    gti = gt.taginfo;
     gti = gt;
-    const time_ms = moment.utc(gti.date).valueOf();
-    const color = computeTimeInterpolatedColor(GLOBAL_START, GLOBAL_END, time_ms);
+    const color = gti.color;
     // Note: gt.color may remain of interest, but I am not currently rendering it.
     showLngLatOnMap(
       gti.longitude,
