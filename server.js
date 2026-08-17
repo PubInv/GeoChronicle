@@ -1,5 +1,5 @@
 /*
-Templokilo allows you to create map applications and record geomarkers in the app of your choosing.
+GeoChronicle allows you to create map applications and record geomarkers in the app of your choosing.
 Copyright (C) 2021 Robert Read, Diego Aspinwall and Neil Martis
 Copyright (C) 2022 Robert L. Read
 
@@ -245,6 +245,6 @@ app.post("/upload", upload.single("file"), function (req, res) {
 
 const port = process.env.PORT || 3000;
 app.listen(port, () => {
-  console.log("PJournal listening on port " + port);
+  console.log("GeoChronicle listening on port " + port);
 });
 
