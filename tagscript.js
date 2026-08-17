@@ -488,7 +488,7 @@ function showLngLatOnMap(lonDec, latDec, color, message, filepath, timestamp) {
   <a href='${filepath}' download>download</a>
 </div>
 
-<img src="${filepath}" alt="${filepath}" height="300">
+<img src="./${filepath}" alt="${filepath}" height="300">
 
 <div id="desc-display">
   <p><b>Description:</b> ${e.features[0].properties.description || "No description added"}</p>
@@ -599,7 +599,7 @@ function reportLS(appname) {
 
 function writeTagLS(appname, obj) {
   var superSubject = getAllDataFromLocalStorage(appname);
-  console.log("superSubject");
+  console.log("superSubject");35-change-name
   console.log(superSubject);
   console.log("obj", obj);
   // WARNING! This is a bug...
