@@ -227,7 +227,7 @@ app.post("/upload", upload.single("file"), function (req, res) {
   var obj = {};
   try {
   const storageRef = firebase.storage().ref();
-  const fileRef = storageRef.child("uploads/" + file.originalname);
+  const fileRef = storageRef.child(file.originalname);
   fileRef.put(file.buffer).then((snapshot) => {
     snapshot.ref.getDownloadURL().then((downloadURL) => {
       myobj.taginfo.filePath = downloadURL;

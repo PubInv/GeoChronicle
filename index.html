@@ -353,6 +353,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 	$('#demo').text("");
 	if (placeUsed == 'searchbar') {
 	    GLOBAL_APPNAME = document.getElementById("searchname").value;
+      window.history.pushState({}, '', '?app=' + GLOBAL_APPNAME);
 	    removeCurrentLoc();
 	}
 
