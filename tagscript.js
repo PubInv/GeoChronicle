@@ -615,26 +615,49 @@ function writeTagLS(appname, obj) {
 
 
 function renderMarkers(v) {
-
   for (const prop in v) {
-    gt = v[prop];
-    gti = gt;
+    const gt = v[prop];
+
+    if (
+      gt.latitude == null ||
+      gt.longitude == null ||
+      !Number.isFinite(Number(gt.latitude)) ||
+      !Number.isFinite(Number(gt.longitude))
+    ) {
+      console.warn("Skipping tag with invalid coordinates:", prop, gt);
+      continue;
+    }
+
     adjust_global_times(gt.date);
   }
+
   for (const prop in v) {
-    gt = v[prop];
-    //    gti = gt.taginfo;
-    gti = gt;
-    const time_ms = moment.utc(gti.date).valueOf();
-    const color = computeTimeInterpolatedColor(GLOBAL_START, GLOBAL_END, time_ms);
-    // Note: gt.color may remain of interest, but I am not currently rendering it.
+    const gt = v[prop];
+
+    if (
+      gt.latitude == null ||
+      gt.longitude == null ||
+      !Number.isFinite(Number(gt.latitude)) ||
+      !Number.isFinite(Number(gt.longitude))
+    ) {
+      console.warn("Skipping tag with invalid coordinates:", prop, gt);
+      continue;
+    }
+
+    const time_ms = moment.utc(gt.date).valueOf();
+    const color = computeTimeInterpolatedColor(
+      GLOBAL_START,
+      GLOBAL_END,
+      time_ms
+    );
+
     showLngLatOnMap(
-      gti.longitude,
-      gti.latitude,
+      Number(gt.longitude),
+      Number(gt.latitude),
       color,
-      gti.description,
-      gti.message,
-      gti.date
+      gt.description,
+      gt.message,
+      gt.date
     );
   }
 }
@@ -661,27 +684,6 @@ function refreshAllDataDB(appname) {
       data: { appName: appname },
       success: function (result) {
         renderMarkers(result);
-        var v = result;
-        for (const prop in v) {
-          const n = parseInt(prop.substring("geotag".length));
-          gt = v[prop];
-          adjust_global_times(gt.date);
-        }
-        for (const prop in v) {
-          const n = parseInt(prop.substring("geotag".length));
-          gt = v[prop];
-          const time_ms = moment.utc(gt.date).valueOf();
-          const color = computeTimeInterpolatedColor(GLOBAL_START, GLOBAL_END, time_ms);
-          // Note: gt.color may remain of interest, but I am not currently rendering it.
-          showLngLatOnMap(
-            gt.longitude,
-            gt.latitude,
-            color,
-            gt.description,
-            gt.filePath,
-            gt.date
-          );
-        }
       },
       error: function (e) {
         console.log("ERROR: ", e);
