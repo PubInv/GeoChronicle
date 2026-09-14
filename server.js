@@ -44,41 +44,10 @@ module.exports = {
   bucket,
 };
 
-// require("firebase/auth");
-// require("firebase/database");
-// require("firebase/storage");
-
-// const firebaseConfig = {
-//   apiKey: process.env.apiKey,
-//   authDomain: process.env.authDomain,
-//   projectId: process.env.projectId,
-//   databaseURL: process.env.databaseURL,
-//   messagingSenderId: process.env.messagingSenderId,
-//   appId: process.env.appId,
-//   storageBucket: process.env.storageBucket,
-// };
-
-// firebase.initializeApp(firebaseConfig);
-
-// firebase
-//   .auth()
-//   .signInAnonymously()
-//   .catch(function (error) {
-//     var errorCode = error.code;
-//     var errorMessage = error.message;
-//     console.log(errorCode);
-//     console.log(errorMessage);
-//   });
-
-// const ref = firebase.database().ref();
-
 const ref = database.ref();
 
 app.use(express.static(__dirname));
 app.use(cors());
-
-//app.use(bodyParser.urlencoded({ extended:false }));
-//app.use(bodyParser.json());
 
 var returnFirebaseSnapshot = (req, ref, res) => {
   var appName = req.query.appName;
