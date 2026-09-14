@@ -416,7 +416,7 @@ function showLngLatOnMap(lonDec, latDec, color, message, filepath, timestamp) {
   // here we will interpolate color based on time.
   // This is NOT an intrinsic property of the point,
   // but a property of all the data.
-  if (color == "black" && map.getStyle().sources["point-current"]) {
+    if (color == "black" && map.getStyle().sources["point-current"]) {
     map.getSource("point-current").setData({
       type: "FeatureCollection",
       features: [
@@ -469,7 +469,8 @@ function showLngLatOnMap(lonDec, latDec, color, message, filepath, timestamp) {
 
     map.on("mouseenter", filepath, function (e) {
       var coordinates = e.features[0].geometry.coordinates.slice();
-      var description = e.features[0].properties.description;
+        var description = e.features[0].properties.description;
+        console.log("feature description on mouseenter",description);
 
       while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
         coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
@@ -502,16 +503,6 @@ function showLngLatOnMap(lonDec, latDec, color, message, filepath, timestamp) {
       if (GLOBAL_POPUP) GLOBAL_POPUP.remove();
       GLOBAL_POPUP = new mapboxgl.Popup().setLngLat(coordinates).setHTML(fullHTML).addTo(map);
     });
-
-    // map.on("mouseenter", "point" + n, function () {
-    //   map.getCanvas().style.cursor = "pointer";
-    // });
-
-    // It would be nice to pull the pop up down on hover, but that makes it impossible to reach links in it!
-    //    map.on("mouseleave", "point" + n, function () {
-    //      map.getCanvas().style.cursor = "";
-    //      if (GLOBAL_POPUP) GLOBAL_POPUP.remove();
-    //    });
   }
 }
 
@@ -521,7 +512,9 @@ function editDescription(filepath) {
 }
 
 function saveDescription(filepath) {
-  var newDescription = document.getElementById("desc-text-" + filepath).value;
+    var newDescription = document.getElementById("desc-text-" + filepath).value;
+    var newEdit = document.getElementById("desc-edit-" + filepath).value;
+    console.log("newD, newE", newDescription, newEdit);
 
   $.ajax({
     type: "GET",
@@ -532,10 +525,18 @@ function saveDescription(filepath) {
       tagId: filepath.replace(/[./#$[\]]/g, "_"),
       description: newDescription
     },
-    success: function (result) {
-      document.getElementById("desc-display").querySelector("p").innerHTML = "<b>Description:</b> " + newDescription;
+      success: function (result) {
+      // This is necessary to make it internally consistent
+      // but is probably overkill...we only changed one
+      // tag, so we should select it out and change it
+          // at only one tag--I will leave that for someon else. - rlr
+
+
+
+      document.getElementById("desc-display").innerHTML = "<b>Description:</b> <p>" + newDescription+ "</p>";
       document.getElementById("desc-display").style.display = "block";
-      document.getElementById("desc-edit-" + filepath).style.display = "none";
+          document.getElementById("desc-edit-" + filepath).style.display = "none";
+          refreshAllDataDB(GLOBAL_APPNAME);
     },
     error: function (e) {
       console.log("ERROR: ", e);
@@ -650,7 +651,7 @@ function renderMarkers(v) {
       GLOBAL_END,
       time_ms
     );
-
+    console.log("property description",gt.description);
     showLngLatOnMap(
       Number(gt.longitude),
       Number(gt.latitude),

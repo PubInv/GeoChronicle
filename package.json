@@ -17,11 +17,11 @@
     "exif-js": "^2.3.0",
     "exifreader": "^4.2.0",
     "express": "^4.17.3",
-    "firebase": "^8.6.1",
-    "firebase-admin": "^9.8.0",
+    "firebase": "^12.19.0",
+    "firebase-admin": "^13.10.0",
     "jquery": "^3.6.0",
     "mapbox-gl": "^3.24.0",
-    "multer": "^1.4.4"
+    "multer": "^2.4.0"
   },
   "engines": {
     "node": "^14.16.0",
