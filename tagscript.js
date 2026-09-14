@@ -113,78 +113,6 @@ function writeTag(
   document.getElementById("message").value = "";
 }
 
-// function getLastTagNumInDB() {
-//   return new Promise(function (resolve, reject) {
-//     $.ajax({
-//       type: "GET",
-//       url: "returnTags",
-//       dataType: "json",
-//       data: { appName: GLOBAL_APPNAME },
-//       success: function (result) {
-//         var highestnum = 0;
-//         var v = result;
-//         for (const prop in v) {
-//           const n = parseInt(prop.substring("geotag".length));
-//           highestnum = Math.max(highestnum, n);
-//           if (highestnum == NaN) {
-//             highestnum = 0;
-//           }
-//         }
-//         resolve(highestnum);
-//       },
-//       error: function (e) {
-//         console.log("ERROR: ", e);
-//       },
-//     });
-//   });
-// }
-
-// function getLastTagNumInDBSynchronously() {
-//   var highestnum = 0;
-//   getLastTagNumInDB().then(function (data) {
-//     highestnum = data;
-//     console.log("data in promise");
-//     console.log(data);
-//   });
-//   return highestnum;
-// }
-
-// async function getLastTagNumInDBandWrite(color) {
-//   var highestnum = 0;
-
-//   $.ajax({
-//     type: "GET",
-//     url: "returnTags",
-//     dataType: "json",
-//     data: { appName: GLOBAL_APPNAME },
-//     success: function (result) {
-//       var v = result;
-//       for (const prop in v) {
-//         const n = parseInt(prop.substring("geotag".length));
-//         highestnum = Math.max(highestnum, n);
-//         if (highestnum == NaN) {
-//           highestnum = 0;
-//         }
-//       }
-//       var options = { enableHighAccuracy: false, timeout: 10000 };
-//       navigator.geolocation.getCurrentPosition(
-//         (position) =>
-//         createTag(
-//           position,
-//           color,
-//           highestnum + 1,
-//           GLOBAL_APPNAME,
-//           "createdbyclick"
-//         ),
-//         error,
-//         options
-//       );
-//     },
-//     error: function (e) {
-//       console.log("ERROR: ", e);
-//     },
-//   });
-// }
 
 function error(err) {
   console.warn(`ERROR(${err.code}): ${err.message}`);
@@ -277,7 +205,7 @@ async function createPhotoUploadTag(file, tags, username, color) {
   // The "filename" here is raw from an upload in this
   // code. We will turn it into a url (relative in this case)
   // by prepending "/uploads"
-  var url = "uploads/" + filename;
+  var url = filename;
   var safeTagId = url.replace(/[./#$[\]]/g, "_");
   var obj = {
     appname: GLOBAL_APPNAME ? GLOBAL_APPNAME : "abc",
@@ -477,19 +405,21 @@ function showLngLatOnMap(lonDec, latDec, color, message, filepath, timestamp) {
       }
 
       // We will now add a direct link to the photo to the HTML in the popup,
-      // and then try to add a nice thumbnail.
-      const filename = filepath.split("/").pop();
+        // and then try to add a nice thumbnail.
+        console.log("filepath",filepath);
+        const filename = filepath.split("/")[1];
+        console.log("filename",filename);
 
       var fullHTML = `
 <b>Filename:</b> ${filename}<br>
 <b>Time:</b> ${timestamp}<br>
-<a href='${filepath}' target='_blank'>window</a>
+<!-- <a href='${filepath}' target='_blank'>window</a> -->
 
 <div>
-  <a href='${filepath}' download>download</a>
+  <a href='download/${filename}' download>download</a>
 </div>
 
-<img src="${filepath}" alt="${filepath}" height="300">
+<img src="download/${filename}" alt="${filename}" height="300">
 
 <div id="desc-display">
   <p><b>Description:</b> ${e.features[0].properties.description || "No description added"}</p>

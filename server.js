@@ -184,26 +184,6 @@ app.get("/updateDescription", async function (req, res) {
   }
 });
 
-// app.get("/updateDescription", function (req, res) {
-//   var appName = req.query.appName;
-//   var tagId = req.query.tagId;
-//     var description = req.query.description;
-//     console.log("description",description);
-//     console.log("databaseURL:", process.env.databaseURL);
-//     console.log("Writing path:", path);
-//     console.log("Description:", description);
-//   database
-//     .ref("/apps/" + appName + "/tags/" + tagId + "/description")
-//     .set(description, function (error) {
-//       if (error) {
-//         console.log("ERROR:", error);
-//         res.send(JSON.stringify({ success: false }));
-//       } else {
-//           console.log("success");
-//         res.send(JSON.stringify({ success: true }));
-//       }
-//     });
-// });
 const multer = require("multer");
 const os = require("os");
 //const ExifReader = require('exif-js')
@@ -237,15 +217,6 @@ app.post("/upload", upload.single("file"),async function (req, res) {
 
   var obj = {};
     try {
-        // const storageRef = firebase.storage().ref();
-        // const fileRef = storageRef.child(file.originalname);
-        // fileRef.put(file.buffer).then((snapshot) => {
-        //   snapshot.ref.getDownloadURL().then((downloadURL) => {
-        //     myobj.taginfo.filePath = downloadURL;
-        //     myobj.taginfo.message = downloadURL;
-        //     writeTagIntoDB(myobj.taginfo, fake_req);
-        //   });
-        // });
         const fileRef = bucket.file(file.originalname);
 
         await fileRef.save(file.buffer, {
@@ -255,7 +226,7 @@ app.post("/upload", upload.single("file"),async function (req, res) {
         });
 
         // Store a path or URL for later use.
-        const filePath = `gs://${bucket.name}/${file.originalname}`;
+        const filePath = `${bucket.name}/${file.originalname}`;
 
         myobj.taginfo.filePath = filePath;
         myobj.taginfo.message = filePath;
@@ -267,6 +238,45 @@ app.post("/upload", upload.single("file"),async function (req, res) {
 
   res.sendStatus(200);
 });
+
+app.get("/download/:filename", async function (req, res) {
+    try {
+        const filename = req.params.filename;
+
+        const fileRef = bucket.file(filename);
+        // Check that the object exists
+        const [exists] = await fileRef.exists();
+
+        if (!exists) {
+            return res.status(404).send("Image not found");
+        }
+
+        // Get metadata so we can send the correct MIME type
+        const [metadata] = await fileRef.getMetadata();
+
+        res.setHeader(
+            "Content-Type",
+            metadata.contentType || "application/octet-stream"
+        );
+
+        // Stream the image from Google Cloud Storage to the browser
+        fileRef
+            .createReadStream()
+            .on("error", function (error) {
+                console.error("Error reading image:", error);
+                if (!res.headersSent) {
+                    res.status(500).send("Error retrieving image");
+                }
+            })
+            .pipe(res);
+    } catch (error) {
+        console.error("Error retrieving image:", error);
+        res.status(500).send("Error retrieving image");
+  }
+});
+
+
+
 
 const port = process.env.PORT || 3000;
 app.listen(port, () => {
