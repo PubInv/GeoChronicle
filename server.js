@@ -22,46 +22,36 @@ const app = express();
 var cors = require("cors");
 require("dotenv").config({ path: __dirname + "/.env" });
 
-const firebase = require("firebase/app");
+// const firebase = require("firebase/app");
 
-require("firebase/auth");
-require("firebase/database");
-require("firebase/storage");
+const { initializeApp, applicationDefault } = require("firebase-admin/app");
+const { getDatabase } = require("firebase-admin/database");
+const { getStorage } = require("firebase-admin/storage");
 
-const firebaseConfig = {
-  apiKey: process.env.apiKey,
-  authDomain: process.env.authDomain,
-  projectId: process.env.projectId,
+initializeApp({
+  credential: applicationDefault(),
   databaseURL: process.env.databaseURL,
-  messagingSenderId: process.env.messagingSenderId,
-  appId: process.env.appId,
   storageBucket: process.env.storageBucket,
+});
+
+const database = getDatabase();
+const storage = getStorage();
+const bucket = storage.bucket();
+
+module.exports = {
+  database,
+  storage,
+  bucket,
 };
 
-firebase.initializeApp(firebaseConfig);
-
-firebase
-  .auth()
-  .signInAnonymously()
-  .catch(function (error) {
-    var errorCode = error.code;
-    var errorMessage = error.message;
-    console.log(errorCode);
-    console.log(errorMessage);
-  });
-
-const ref = firebase.database().ref();
+const ref = database.ref();
 
 app.use(express.static(__dirname));
 app.use(cors());
 
-//app.use(bodyParser.urlencoded({ extended:false }));
-//app.use(bodyParser.json());
-
 var returnFirebaseSnapshot = (req, ref, res) => {
   var appName = req.query.appName;
-  firebase
-    .database()
+  database
     .ref("/apps/" + appName + ref)
     .once("value")
     .then((snapshot) => {
@@ -92,8 +82,7 @@ app.get("/reconfigureFromApp", function (req, res) {
 app.get("/deleteAllMarkers", function (req, res) {
   var appName = req.query.appName;
   console.log("in delete");
-  firebase
-    .database()
+  database
     .ref("/apps/" + appName + "/tags")
     .set(null,function (error) {
       if (error) {
@@ -108,8 +97,7 @@ app.get("/deleteAllMarkers", function (req, res) {
 
 app.get("/checkForAppInDatabase", function (req, res) {
   var appName = req.query.appName;
-  firebase
-    .database()
+  database
     .ref("/apps/" + appName)
     .once("value")
     .then((snapshot) => {
@@ -118,8 +106,7 @@ app.get("/checkForAppInDatabase", function (req, res) {
 });
 
 function writeTagIntoDB(obj, req) {
-  firebase
-    .database()
+  database
     .ref("/apps/" + req.query.appname + "/tags/" + req.query.tagId)
     .set(obj, function (error) {
       if (error) {
@@ -147,8 +134,7 @@ app.get("/actuallyCreate", function (req, res) {
     }
   }
   config.tags = {};
-  firebase
-    .database()
+  database
     .ref("apps/" + req.query.appname)
     .set(config, function (error) {
       if (error) {
@@ -161,47 +147,52 @@ app.get("/actuallyCreate", function (req, res) {
     });
 });
 
-app.get("/updateDescription", function (req, res) {
-  var appName = req.query.appName;
-  var tagId = req.query.tagId;
-  var description = req.query.description;
 
-  firebase
-    .database()
-    .ref("/apps/" + appName + "/tags/" + tagId + "/description")
-    .set(description, function (error) {
-      if (error) {
-        console.log("ERROR:", error);
-        res.send(JSON.stringify({ success: false }));
-      } else {
-          console.log("success:", error);
-        res.send(JSON.stringify({ success: true }));
-      }
+app.get("/updateDescription", async function (req, res) {
+  try {
+    const appName = req.query.appName;
+    const tagId = req.query.tagId;
+    const description = req.query.description;
+
+    const path = `/apps/${appName}/tags/${tagId}/description`;
+
+    console.log("databaseURL:", process.env.databaseURL);
+    console.log("Writing path:", path);
+    console.log("Description:", description);
+
+    const ref = database.ref(path);
+
+    await ref.set(description);
+
+    // Immediately read it back to verify the write
+    const snapshot = await ref.once("value");
+
+    console.log("Value after write:", snapshot.val());
+
+    res.json({
+      success: true,
+      path: path,
+      value: snapshot.val()
     });
+  } catch (error) {
+    console.error("Firebase update error:", error);
+
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
 });
+
 const multer = require("multer");
 const os = require("os");
 //const ExifReader = require('exif-js')
 const ExifReader = require("exifreader");
 const fs = require("fs");
 
-/*const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, "./uploads/");
-  },
-  filename: function (req, file, cb) {
-    console.log("compting file name");
-    console.log(file);
-    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
-    cb(null, file.originalname);
-  },
-});
-
-const upload = multer({ storage: storage });
-*/
 const upload = multer({ storage: multer.memoryStorage() });
 
-app.post("/upload", upload.single("file"), function (req, res) {
+app.post("/upload", upload.single("file"),async function (req, res) {
   // by the time we get here, multer
   // has already generated a hash name.
   // This has lost the mimetype information.
@@ -225,26 +216,69 @@ app.post("/upload", upload.single("file"), function (req, res) {
   fake_req.query.tagId = myobj.tagId;
 
   var obj = {};
-  try {
-  const storageRef = firebase.storage().ref();
-  const fileRef = storageRef.child(file.originalname);
-  fileRef.put(file.buffer).then((snapshot) => {
-    snapshot.ref.getDownloadURL().then((downloadURL) => {
-      myobj.taginfo.filePath = downloadURL;
-      myobj.taginfo.message = downloadURL;
-      writeTagIntoDB(myobj.taginfo, fake_req);
-    });
-  });
+    try {
+        const fileRef = bucket.file(file.originalname);
 
-  } catch (err) {
-    console.error(err);
-  }
+        await fileRef.save(file.buffer, {
+            metadata: {
+                contentType: file.mimetype,
+            },
+        });
+
+        // Store a path or URL for later use.
+        const filePath = `${bucket.name}/${file.originalname}`;
+
+        myobj.taginfo.filePath = filePath;
+        myobj.taginfo.message = filePath;
+
+        writeTagIntoDB(myobj.taginfo, fake_req);
+    } catch (err) {
+        console.error(err);
+    }
 
   res.sendStatus(200);
 });
+
+app.get("/download/:filename", async function (req, res) {
+    try {
+        const filename = req.params.filename;
+
+        const fileRef = bucket.file(filename);
+        // Check that the object exists
+        const [exists] = await fileRef.exists();
+
+        if (!exists) {
+            return res.status(404).send("Image not found");
+        }
+
+        // Get metadata so we can send the correct MIME type
+        const [metadata] = await fileRef.getMetadata();
+
+        res.setHeader(
+            "Content-Type",
+            metadata.contentType || "application/octet-stream"
+        );
+
+        // Stream the image from Google Cloud Storage to the browser
+        fileRef
+            .createReadStream()
+            .on("error", function (error) {
+                console.error("Error reading image:", error);
+                if (!res.headersSent) {
+                    res.status(500).send("Error retrieving image");
+                }
+            })
+            .pipe(res);
+    } catch (error) {
+        console.error("Error retrieving image:", error);
+        res.status(500).send("Error retrieving image");
+  }
+});
+
+
+
 
 const port = process.env.PORT || 3000;
 app.listen(port, () => {
   console.log("GeoChronicle listening on port " + port);
 });
-
