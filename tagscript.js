@@ -223,22 +223,7 @@ async function createPhotoUploadTag(file, tags, username, color) {
   };
   form.append("obj", JSON.stringify(obj));
 
-  if (USE_LOCAL_STORAGE) {
-    writeTagLS(GLOBAL_APPNAME, obj);
-  } else {
-    writeTag(
-      safeTagId,
-      lat,
-      lon,
-      color,
-      message,
-      username,
-      // Warning, this is dubious
-      obj.appname,
-      url
-    );
-  }
-
+  
   $.ajax({
     method: "POST",
     url: "http://localhost:3000/upload",
